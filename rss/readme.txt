@@ -1,1 +1,1 @@
-ǰ��ͼ��flash
+﻿前景图和flash
