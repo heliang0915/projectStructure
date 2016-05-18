@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var path=require('path');
+var fs=require('fs');
 // 引入组件
 var htmlmin = require('gulp-htmlmin'), //html压缩
     imagemin = require('gulp-imagemin'),//图片压缩
@@ -57,17 +58,68 @@ gulp.task('html', function () {
           .pipe(gulp.dest(destViewPath+'/'))
           .pipe(notify({message: 'html min ok !!!'}));
 });
-gulp.task('all',['js', 'css', 'images','html','watch']);
+
+gulp.task('font',function(){
+  return gulp.src(devResPath+'/font/*')
+        .pipe(gulp.dest(destPath+'/font/'))
+        .pipe(notify({message: 'font  ok !!!'}));
+});
+
+//拷贝weight
+gulp.task('weight',function(){
+  return gulp.src(devResPath+'/weight/*/*.js')
+        .pipe(uglify({
+          mangle:true
+        }))
+        .pipe(gulp.dest(destPath+'/weight/'))
+        .pipe(notify({message: 'weight  ok !!!'}));
+})
+
+//拷贝libs
+gulp.task('libs',function(){
+  return gulp.src('dev/libs/*')
+          .pipe(uglify({
+            mangle:true
+          }))
+        .pipe(gulp.dest('release/libs/'))
+        .pipe(notify({message: 'libs  ok !!!'}));
+})
+
+gulp.task('updateBoot',['libs'],function () {
+  var bootJS='release/libs/boot.js';
+    fs.readFile(bootJS,function(err,data){
+        // console.log('data>>'+data);
+        if(err){
+            console.log("boot.js替换失败"+err);
+        }else{
+          var jsStr=data.toString();
+          jsStr=jsStr.replace('isDev=!','isDev=');
+          fs.writeFile(bootJS,jsStr,function(err){
+              if(err){
+                console.log("写入失败:"+err);
+              }
+          });
+
+        }
+      })
+})
+
+
+gulp.task('all',['js', 'css', 'images','html','font','weight','libs','updateBoot','watch']);
 
 //监控
 gulp.task('watch', function () {
+    //监控js
     gulp.watch(devResPath + '/js/*.js',['js']);
+    //监控weight
+    gulp.watch(devResPath+'/weight/*/*.js',['weight','updateBoot']);
     //监控css
     gulp.watch(devResPath + '/css/*.css', ['css']);
     //监控images
     gulp.watch(devResPath + '/images/*',['images']);
+    // 监控字体
+    gulp.watch(devResPath + '/font/*',['font']);
     //监控html
     gulp.watch(viewsPath + '/*.html',['html']);
 })
-
 gulp.task('default', ['all']);
