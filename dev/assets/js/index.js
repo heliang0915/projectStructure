@@ -1,4 +1,3 @@
-function aaa(){
-	alert("aaa");
-}
-aaa();
+require(['dialog'], function(dialog) {
+    alert(dialog);
+})
