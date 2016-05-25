@@ -1,3 +1,3 @@
 require(['dialog'], function(dialog) {
-    alert(dialog);
+    alert(dialog.name);
 })
